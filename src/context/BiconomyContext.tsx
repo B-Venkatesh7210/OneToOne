@@ -12,12 +12,13 @@ import {
 import { ethers } from "ethers";
 import { ChainId } from "@biconomy/core-types";
 import { Magic } from "magic-sdk";
-import { contractABI } from "../abi/contractABI"
-import { 
-  IHybridPaymaster, 
+import { contractABI } from "../abi/contractABI";
+import {
+  IHybridPaymaster,
   SponsorUserOperationDto,
-  PaymasterMode
-} from '@biconomy/paymaster'
+  PaymasterMode,
+} from "@biconomy/paymaster";
+import { IFormData } from "@/utils/types";
 
 export const BiconomyContext = createContext<{
   address: string | null;
@@ -25,12 +26,14 @@ export const BiconomyContext = createContext<{
   provider: any;
   connect: () => Promise<void>;
   changeNumber: () => Promise<void>;
+  createMentorProfile: (data: IFormData) => Promise<void>;
 }>({
   address: null,
   smartAccount: null,
   provider: null,
   connect: async () => {},
   changeNumber: async () => {},
+  createMentorProfile: async (data: IFormData) => {},
 });
 
 export const useBiconomyContext = () => React.useContext(BiconomyContext);
@@ -40,10 +43,12 @@ export const BiconomyProvider = ({ children }: any) => {
   const [smartAccount, setSmartAccount] =
     useState<BiconomySmartAccountV2 | null>(null);
   const [provider, setProvider] = useState<any>(null);
-  const [biconomyPaymaster, setBiconomyPaymaster] = useState<IHybridPaymaster<SponsorUserOperationDto> | null>(null)
-  const [paymasterServiceData, setPaymasterServiceData] = useState<SponsorUserOperationDto | null>(null)
-  const [contract, setContract] = useState<any>(null)
-  const [contractAddress, setContractAddress] = useState<string | null>(null)
+  const [biconomyPaymaster, setBiconomyPaymaster] =
+    useState<IHybridPaymaster<SponsorUserOperationDto> | null>(null);
+  const [paymasterServiceData, setPaymasterServiceData] =
+    useState<SponsorUserOperationDto | null>(null);
+  const [contract, setContract] = useState<any>(null);
+  const [contractAddress, setContractAddress] = useState<string | null>(null);
 
   let magic: any;
 
@@ -88,8 +93,8 @@ export const BiconomyProvider = ({ children }: any) => {
       let paymasterServiceData: SponsorUserOperationDto = {
         mode: PaymasterMode.SPONSORED,
         smartAccountInfo: {
-          name: 'BICONOMY',
-          version: '2.0.0'
+          name: "BICONOMY",
+          version: "2.0.0",
         },
       };
       setPaymasterServiceData(paymasterServiceData);
@@ -128,26 +133,35 @@ export const BiconomyProvider = ({ children }: any) => {
       //@ts-ignore
       contractAddress,
       contractABI,
-      provider,
-    )
-    setContract(contract)
-      // const savedAddress = localStorage.getItem("address");
-      // const savedSmartAccount = JSON.parse(
-      //   localStorage.getItem("smartAccount") || "{}"
-      // );
+      provider
+    );
+    setContract(contract);
+    // const savedAddress = localStorage.getItem("address");
+    // const savedSmartAccount = JSON.parse(
+    //   localStorage.getItem("smartAccount") || "{}"
+    // );
 
-      // if (savedAddress) {
-      //   setAddress(savedAddress);
-      // }
+    // if (savedAddress) {
+    //   setAddress(savedAddress);
+    // }
 
-      // if (savedSmartAccount) {
-      //   setSmartAccount(savedSmartAccount);
-      // }
+    // if (savedSmartAccount) {
+    //   setSmartAccount(savedSmartAccount);
+    // }
   }, []);
 
-  const changeNumber = async () => {
+  const createMentorProfile = async (formData: IFormData) => {
     try {
-      const minTx = await contract.populateTransaction.changeNumber(20);
+      const metaData = "metadata";
+      //TODO: Add metadata
+      const minTx = await contract.populateTransaction.createMentorProfile(
+        formData.name,
+        formData.description,
+        formData.skills,
+        formData.sessionPrice,
+        formData.totalNftsupply,
+        metaData
+      );
       console.log("Mint Tx Data", minTx.data);
       const tx1 = {
         to: contractAddress,
@@ -155,15 +169,47 @@ export const BiconomyProvider = ({ children }: any) => {
       };
       //@ts-ignore
       let userOp = await smartAccount?.buildUserOp([tx1]);
-      console.log("UserOp", {userOp});
-      
+      console.log("UserOp", { userOp });
+
       const paymasterAndDataResponse =
         await biconomyPaymaster?.getPaymasterAndData(
           //@ts-ignore
           userOp,
           paymasterServiceData
         );
-      
+
+      //@ts-ignore
+      userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
+      //@ts-ignore
+      const userOpResponse = await smartAccount?.sendUserOp(userOp);
+      console.log("userOpHash", { userOpResponse });
+      //@ts-ignore
+      const { receipt } = await userOpResponse.wait(1);
+      console.log("txHash", receipt.transactionHash);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const changeNumber = async () => {
+    try {
+      const minTx = await contract.populateTransaction.changeNumber(22);
+      console.log("Mint Tx Data", minTx.data);
+      const tx1 = {
+        to: contractAddress,
+        data: minTx.data,
+      };
+      //@ts-ignore
+      let userOp = await smartAccount?.buildUserOp([tx1]);
+      console.log("UserOp", { userOp });
+
+      const paymasterAndDataResponse =
+        await biconomyPaymaster?.getPaymasterAndData(
+          //@ts-ignore
+          userOp,
+          paymasterServiceData
+        );
+
       //@ts-ignore
       userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
       //@ts-ignore
@@ -174,12 +220,21 @@ export const BiconomyProvider = ({ children }: any) => {
       console.log("txHash", receipt.transactionHash);
     } catch (err: any) {
       console.error(err);
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   return (
-    <BiconomyContext.Provider value={{ address, smartAccount, provider, connect, changeNumber }}>
+    <BiconomyContext.Provider
+      value={{
+        address,
+        smartAccount,
+        provider,
+        connect,
+        changeNumber,
+        createMentorProfile,
+      }}
+    >
       {children}
     </BiconomyContext.Provider>
   );

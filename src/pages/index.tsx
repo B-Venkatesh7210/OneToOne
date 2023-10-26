@@ -1,9 +1,12 @@
 import React, { useEffect, useContext } from "react";
 import { BiconomyContext } from "@/context/BiconomyContext";
+import { useRouter } from "next/router";
 
 const Home = () => {
   const { address, connect, smartAccount, changeNumber } =
     useContext(BiconomyContext);
+
+  const router = useRouter();
 
   return (
     <>
@@ -28,7 +31,7 @@ const Home = () => {
             <span>Your Address is : {address}</span>
             <button
               onClick={() => {
-                console.log(smartAccount);
+                router.push("/becomeMentor");
               }}
               className="w-[15rem] h-[3rem] bg-blue-500 text-[1.2rem] font-bold rounded-xl mt-10"
             >
