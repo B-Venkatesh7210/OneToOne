@@ -40,11 +40,16 @@ export const BiconomyProvider = ({ children }: any) => {
   const [smartAccount, setSmartAccount] =
     useState<BiconomySmartAccountV2 | null>(null);
   const [provider, setProvider] = useState<any>(null);
+  const [biconomyPaymaster, setBiconomyPaymaster] = useState<IHybridPaymaster<SponsorUserOperationDto> | null>(null)
+  const [paymasterServiceData, setPaymasterServiceData] = useState<SponsorUserOperationDto | null>(null)
+  const [contract, setContract] = useState<any>(null)
+  const [contractAddress, setContractAddress] = useState<string | null>(null)
+
   let magic: any;
 
   const bundler: IBundler = new Bundler({
     bundlerUrl:
-      "https://bundler.biconomy.io/api/v2/{chain-id-here}/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44",
+      "https://bundler.biconomy.io/api/v2/80001/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44",
     chainId: ChainId.POLYGON_MUMBAI, // or any supported chain of your choice
     entryPointAddress: DEFAULT_ENTRYPOINT_ADDRESS,
   });
@@ -77,6 +82,17 @@ export const BiconomyProvider = ({ children }: any) => {
       });
 
       const address = await biconomySmartAccount.getAccountAddress();
+      const biconomyPaymaster =
+        biconomySmartAccount.paymaster as IHybridPaymaster<SponsorUserOperationDto>;
+      setBiconomyPaymaster(biconomyPaymaster);
+      let paymasterServiceData: SponsorUserOperationDto = {
+        mode: PaymasterMode.SPONSORED,
+        smartAccountInfo: {
+          name: 'BICONOMY',
+          version: '2.0.0'
+        },
+      };
+      setPaymasterServiceData(paymasterServiceData);
       console.log(address);
       //0x9D325543fec51Fa17B959Ed5cfdABde780521eF5
       setSmartAccount(biconomySmartAccount);
@@ -103,64 +119,59 @@ export const BiconomyProvider = ({ children }: any) => {
     const provider = new ethers.providers.JsonRpcProvider(
       "https://rpc.ankr.com/polygon_mumbai"
     );
-    localStorage.setItem("provider", JSON.stringify(provider));
+    // localStorage.setItem("provider", JSON.stringify(provider));
     setProvider(provider);
-    const savedAddress = localStorage.getItem("address");
-    const savedSmartAccount = JSON.parse(
-      localStorage.getItem("smartAccount") || "{}"
-    );
-
-    if (savedAddress) {
-      setAddress(savedAddress);
-    }
-
-    if (savedSmartAccount) {
-      setSmartAccount(savedSmartAccount);
-    }
-  }, []);
-
-  const changeNumber = async () => {
     const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+    //@ts-ignore
+    setContractAddress(contractAddress);
     const contract = new ethers.Contract(
       //@ts-ignore
       contractAddress,
       contractABI,
       provider,
     )
+    setContract(contract)
+      // const savedAddress = localStorage.getItem("address");
+      // const savedSmartAccount = JSON.parse(
+      //   localStorage.getItem("smartAccount") || "{}"
+      // );
+
+      // if (savedAddress) {
+      //   setAddress(savedAddress);
+      // }
+
+      // if (savedSmartAccount) {
+      //   setSmartAccount(savedSmartAccount);
+      // }
+  }, []);
+
+  const changeNumber = async () => {
     try {
-      const minTx = await contract.populateTransaction.changeNumber("17");
-      console.log(minTx.data);
+      const minTx = await contract.populateTransaction.changeNumber(20);
+      console.log("Mint Tx Data", minTx.data);
       const tx1 = {
         to: contractAddress,
         data: minTx.data,
       };
       //@ts-ignore
       let userOp = await smartAccount?.buildUserOp([tx1]);
-      console.log({ userOp })
-      // const biconomyPaymaster =
-      //   smartAccount?.paymaster as IHybridPaymaster<SponsorUserOperationDto>;
-      // let paymasterServiceData: SponsorUserOperationDto = {
-      //   mode: PaymasterMode.SPONSORED,
-      //   smartAccountInfo: {
-      //     name: 'BICONOMY',
-      //     version: '2.0.0'
-      //   },
-      // };
-      // const paymasterAndDataResponse =
-      //   await biconomyPaymaster.getPaymasterAndData(
-      //     //@ts-ignore
-      //     userOp,
-      //     paymasterServiceData
-      //   );
+      console.log("UserOp", {userOp});
       
-      // //@ts-ignore
-      // userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
-      // //@ts-ignore
-      // const userOpResponse = await smartAccount?.sendUserOp(userOp);
-      // console.log("userOpHash", userOpResponse);
-      // //@ts-ignore
-      // const { receipt } = await userOpResponse.wait(1);
-      // console.log("txHash", receipt.transactionHash);
+      const paymasterAndDataResponse =
+        await biconomyPaymaster?.getPaymasterAndData(
+          //@ts-ignore
+          userOp,
+          paymasterServiceData
+        );
+      
+      //@ts-ignore
+      userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
+      //@ts-ignore
+      const userOpResponse = await smartAccount?.sendUserOp(userOp);
+      console.log("userOpHash", userOpResponse);
+      //@ts-ignore
+      const { receipt } = await userOpResponse.wait(1);
+      console.log("txHash", receipt.transactionHash);
     } catch (err: any) {
       console.error(err);
       console.log(err)
