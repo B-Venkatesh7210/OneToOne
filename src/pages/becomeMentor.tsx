@@ -52,7 +52,7 @@ const BecomeMentor: React.FC = () => {
     }
   };
 
-  // const dataURLtoBlob = (dataURL) => {
+  // const dataURLtoBlob = (dataURL: any) => {
   //   let binary = atob(dataURL.split(",")[1]);
   //   let array = [];
   //   for (let i = 0; i < binary.length; i++) {
@@ -75,7 +75,7 @@ const BecomeMentor: React.FC = () => {
   //     const canvas = await html2canvas(divElement);
   //     const imageData = canvas.toDataURL("image/png");
   //     const nftURL = await uploadToNFTStorage(imageData);
-  //     console.log(nftURL);
+  //     console.log("Nft URL", nftURL);
   //     return nftURL;
   //   } catch (error) {
   //     console.error("Error while uploading to NFT Storage:", error);
@@ -83,18 +83,30 @@ const BecomeMentor: React.FC = () => {
   //   }
   // };
 
-  async function uploadDivToNFTStorage(divId: string) {
+  async function uploadDivToNFTStorage(
+    divId: string
+  ): Promise<string | undefined> {
     try {
-      const divContent = document.getElementById(divId)?.innerHTML;
-
-      if (!divContent) {
-        throw new Error("Div not found or empty");
+      const divElement = document.getElementById(divId);
+      if (!divElement) {
+        throw new Error("Div not found");
       }
 
-      // Convert the div content to a Blob
-      const blob = new Blob([divContent], { type: "text/html" });
+      // Convert div to canvas
+      const canvas = await html2canvas(divElement);
 
-      const file = new File([blob], `${divId}.html`, { type: "text/html" });
+      // Convert canvas to blob and wrap in a promise
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((result) => {
+          resolve(result);
+        }, "image/png");
+      });
+
+      if (!blob) {
+        throw new Error("Failed to convert canvas to blob");
+      }
+
+      const file = new File([blob], `${divId}.png`, { type: "image/png" });
 
       // Store the blob in NFT storage
       const cid = await client.storeBlob(file);
@@ -259,12 +271,26 @@ const BecomeMentor: React.FC = () => {
             <div className="flex justify-center">
               <button
                 onClick={async () => {
-                  uploadDivToNFTStorage("nftDiv");
-                  // createMentorProfile(
-                  //   formData,
-                  //   profilePicture,
-                  //   profilePictureName
-                  // );
+                  const nftCid = await uploadDivToNFTStorage("nftDiv");
+                  console.log(nftCid);
+                  const metadataObj = {
+                    name: `One To One NFT of Mentor ${formData.name}`,
+                    description: `This NFT is of Mentor ${formData.name} with description as ${formData.description}.`,
+                    image: `ipfs://${nftCid}`,
+                  };
+                  const metadataJSON = JSON.stringify(metadataObj);
+                  const metadataBlob = new Blob([metadataJSON], {
+                    type: "application/json",
+                  });
+                  const metadataCID = await client.storeBlob(metadataBlob);
+                  const metadata = `ipfs://${metadataCID}`;
+                  console.log("Metadata", metadata);
+                  createMentorProfile(
+                    formData,
+                    profilePicture,
+                    profilePictureName,
+                    metadata
+                  );
                 }}
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-black focus:shadow-outline"
               >

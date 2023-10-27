@@ -16,7 +16,8 @@ export const MentorContext = createContext<{
   createMentorProfile: (
     data: IFormData,
     profilePicture: File | null,
-    profilePictureName: string | null
+    profilePictureName: string | null,
+    metadata: string | null
   ) => Promise<void>;
   getMentorDetails: () => Promise<void>;
 }>({
@@ -47,11 +48,13 @@ export const MentorProvider = ({ children }: any) => {
   const createMentorProfile = async (
     formData: IFormData,
     profilePicture: File | null,
-    profilePictureName: string | null
+    profilePictureName: string | null,
+    metadata: string | null
   ) => {
+    console.log("Hey Wassup");
     try {
-      const metaData = "metadata";
       //TODO: Add metadata
+      
       const sessionPriceBig = ethers.utils.parseEther(
         formData.sessionPrice.toString()
       );
@@ -64,7 +67,17 @@ export const MentorProvider = ({ children }: any) => {
       );
       const imageBlob = imageFile.slice(0, imageFile.size, imageFile.type);
       const profilePictureCid = await client.storeBlob(imageBlob);
-      console.log(profilePictureCid);
+      console.log("Profile Picture Cid", profilePictureCid);
+      console.log(
+        "Mentor Profile Data",
+        formData.name,
+        profilePictureCid,
+        formData.description,
+        formData.skills,
+        sessionPriceBig,
+        formData.totalNftsupply,
+        metadata
+      );
       const minTx = await contract.populateTransaction.createMentorProfile(
         formData.name,
         profilePictureCid,
@@ -72,7 +85,7 @@ export const MentorProvider = ({ children }: any) => {
         formData.skills,
         sessionPriceBig,
         formData.totalNftsupply,
-        metaData
+        metadata
       );
       console.log("Mint Tx Data", minTx.data);
       const tx1 = {
@@ -108,7 +121,14 @@ export const MentorProvider = ({ children }: any) => {
     if (contract) {
       console.log("Hey I am inside");
       const mentorData = await contract.mentorProfiles(address);
-      console.log(mentorData);
+      setMentorDetails({
+        name: mentorData.name,
+        profilePicture: mentorData.profilePicture,
+        description: mentorData.description,
+        skills: mentorData.skills,
+        sessionPrice: mentorData.sessionPrice,
+        totalNftSupply: mentorData.totalNftSupply,
+      });
     }
   };
 

@@ -8,8 +8,9 @@ export interface IFormData {
 
 export interface IMentorDetails {
   name: string;
+  profilePicture: string;
   description: string;
   skills: string;
-  totalNftsupply: number;
   sessionPrice: number;
+  totalNftSupply: number;
 }
