@@ -24,16 +24,23 @@ export const BiconomyContext = createContext<{
   address: string | null;
   smartAccount: BiconomySmartAccountV2 | null;
   provider: any;
+  contract: any;
+  contractAddress: string | null;
+  biconomyPaymaster: IHybridPaymaster<SponsorUserOperationDto> | null;
+  paymasterServiceData: SponsorUserOperationDto | null;
   connect: () => Promise<void>;
   changeNumber: () => Promise<void>;
-  createMentorProfile: (data: IFormData) => Promise<void>;
+
 }>({
   address: null,
   smartAccount: null,
   provider: null,
+  contract: null,
+  contractAddress: null,
+  biconomyPaymaster: null,
+  paymasterServiceData: null,
   connect: async () => {},
   changeNumber: async () => {},
-  createMentorProfile: async (data: IFormData) => {},
 });
 
 export const useBiconomyContext = () => React.useContext(BiconomyContext);
@@ -135,6 +142,7 @@ export const BiconomyProvider = ({ children }: any) => {
       contractABI,
       provider
     );
+    console.log(contract)
     setContract(contract);
     // const savedAddress = localStorage.getItem("address");
     // const savedSmartAccount = JSON.parse(
@@ -149,47 +157,6 @@ export const BiconomyProvider = ({ children }: any) => {
     //   setSmartAccount(savedSmartAccount);
     // }
   }, []);
-
-  const createMentorProfile = async (formData: IFormData) => {
-    try {
-      const metaData = "metadata";
-      //TODO: Add metadata
-      const minTx = await contract.populateTransaction.createMentorProfile(
-        formData.name,
-        formData.description,
-        formData.skills,
-        formData.sessionPrice,
-        formData.totalNftsupply,
-        metaData
-      );
-      console.log("Mint Tx Data", minTx.data);
-      const tx1 = {
-        to: contractAddress,
-        data: minTx.data,
-      };
-      //@ts-ignore
-      let userOp = await smartAccount?.buildUserOp([tx1]);
-      console.log("UserOp", { userOp });
-
-      const paymasterAndDataResponse =
-        await biconomyPaymaster?.getPaymasterAndData(
-          //@ts-ignore
-          userOp,
-          paymasterServiceData
-        );
-
-      //@ts-ignore
-      userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
-      //@ts-ignore
-      const userOpResponse = await smartAccount?.sendUserOp(userOp);
-      console.log("userOpHash", { userOpResponse });
-      //@ts-ignore
-      const { receipt } = await userOpResponse.wait(1);
-      console.log("txHash", receipt.transactionHash);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const changeNumber = async () => {
     try {
@@ -230,9 +197,12 @@ export const BiconomyProvider = ({ children }: any) => {
         address,
         smartAccount,
         provider,
+        contract,
+        contractAddress,
+        biconomyPaymaster,
+        paymasterServiceData,
         connect,
-        changeNumber,
-        createMentorProfile,
+        changeNumber
       }}
     >
       {children}

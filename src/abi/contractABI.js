@@ -19,7 +19,7 @@ export const contractABI = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_freelancerId",
+        name: "_mentorId",
         type: "uint256",
       },
       {
@@ -55,6 +55,11 @@ export const contractABI = [
       },
       {
         internalType: "string",
+        name: "_profilePicture",
+        type: "string",
+      },
+      {
+        internalType: "string",
         name: "_description",
         type: "string",
       },
@@ -86,7 +91,7 @@ export const contractABI = [
   },
   {
     inputs: [],
-    name: "freelancerId",
+    name: "mentorId",
     outputs: [
       {
         internalType: "uint256",
@@ -105,7 +110,7 @@ export const contractABI = [
         type: "uint256",
       },
     ],
-    name: "freelancerIdToAddress",
+    name: "mentorIdToAddress",
     outputs: [
       {
         internalType: "address",
@@ -129,7 +134,7 @@ export const contractABI = [
         type: "uint256",
       },
     ],
-    name: "freelancerIdToSessions",
+    name: "mentorIdToSessions",
     outputs: [
       {
         internalType: "uint256",
@@ -140,6 +145,11 @@ export const contractABI = [
         internalType: "uint256",
         name: "sessionPrice",
         type: "uint256",
+      },
+      {
+        internalType: "string",
+        name: "roomId",
+        type: "string",
       },
       {
         internalType: "address",
@@ -193,7 +203,7 @@ export const contractABI = [
         type: "address",
       },
     ],
-    name: "freelancerProfiles",
+    name: "mentorProfiles",
     outputs: [
       {
         internalType: "uint256",
@@ -208,6 +218,11 @@ export const contractABI = [
       {
         internalType: "string",
         name: "name",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "profilePicture",
         type: "string",
       },
       {
@@ -277,7 +292,7 @@ export const contractABI = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_freelancerId",
+        name: "_mentorId",
         type: "uint256",
       },
       {
@@ -302,6 +317,11 @@ export const contractABI = [
         internalType: "uint256",
         name: "sessionPrice",
         type: "uint256",
+      },
+      {
+        internalType: "string",
+        name: "roomId",
+        type: "string",
       },
       {
         internalType: "uint256",
@@ -362,4 +382,3 @@ export const contractABI = [
     type: "function",
   },
 ];
-
