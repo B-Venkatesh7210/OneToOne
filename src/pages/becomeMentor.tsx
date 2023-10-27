@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { IFormData } from "@/utils/types";
 import { BiconomyContext } from "../context/BiconomyContext";
+import Navbar from "@/components/Navbar";
 
 const BecomeMentor: React.FC = () => {
   const { createMentorProfile } = useContext(BiconomyContext);
@@ -21,10 +22,12 @@ const BecomeMentor: React.FC = () => {
 
   return (
     <>
-      <div className="w-full min-h-screen h-auto flex flex-col justify-start items-center py-10 px-10 bg-red-600">
+      <div className="w-full min-h-screen h-auto flex flex-col justify-start items-center py-10 px-10 bg-gray-950">
+        <Navbar isSticky={true} />
+        <div className="h-[10vh]"></div>
         <div className="text-[3rem] font-bold mb-10">Become A Mentor</div>
 
-        <div className="bg-white p-10 rounded-lg shadow-md w-full max-w-xl">
+        <div className="bgBeauty p-10 rounded-lg shadow-md w-full max-w-xl">
           <div className="mb-6">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
@@ -33,7 +36,7 @@ const BecomeMentor: React.FC = () => {
               Name
             </label>
             <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-black focus:shadow-outline"
               id="name"
               name="name"
               type="text"
@@ -50,7 +53,7 @@ const BecomeMentor: React.FC = () => {
               Description
             </label>
             <textarea
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-black focus:shadow-outline"
               id="description"
               name="description"
               rows={3}
@@ -67,7 +70,7 @@ const BecomeMentor: React.FC = () => {
               Skills
             </label>
             <textarea
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-black focus:shadow-outline"
               id="skills"
               name="skills"
               rows={3}
@@ -84,7 +87,7 @@ const BecomeMentor: React.FC = () => {
               Total NFT Supply
             </label>
             <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-black focus:shadow-outline"
               id="totalNftsupply"
               name="totalNftsupply"
               type="number"
@@ -102,7 +105,7 @@ const BecomeMentor: React.FC = () => {
               Session Price
             </label>
             <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-black focus:shadow-outline"
               id="sessionPrice"
               name="sessionPrice"
               type="number"
@@ -117,7 +120,7 @@ const BecomeMentor: React.FC = () => {
               onClick={() => {
                 createMentorProfile(formData);
               }}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-black focus:shadow-outline"
             >
               Submit
             </button>

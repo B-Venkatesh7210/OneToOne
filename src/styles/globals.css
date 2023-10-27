@@ -16,6 +16,31 @@
   }
 }
 
+/* Style for the custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  background-color: transparent; /* Set the background color of the scrollbar track */
+}
+
+::-webkit-scrollbar-thumb {
+  margin-left: 1rem;
+  margin-right: 1rem;
+  background: radial-gradient(
+    circle at 10% 20%,
+    rgb(220, 217, 249) 0%,
+    rgb(172, 224, 217) 89.8%
+  ); /* Set the color of the scrollbar thumb (the moving part) */
+  border-radius: 12px; /* Add soft edges to the scrollbar thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: radial-gradient(
+    circle at 10% 20%,
+    rgb(220, 217, 249) 0%,
+    rgb(172, 224, 217) 89.8%
+  ); /* Change the color on hover if desired */
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -24,4 +49,12 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+}
+
+.bgBeauty {
+  background: radial-gradient(
+    circle at 10% 20%,
+    rgb(220, 217, 249) 0%,
+    rgb(172, 224, 217) 89.8%
+  );
 }
