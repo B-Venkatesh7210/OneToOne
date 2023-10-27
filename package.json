@@ -15,6 +15,8 @@
     "@biconomy/core-types": "^3.1.0",
     "@biconomy/modules": "^3.1.0",
     "@biconomy/paymaster": "^3.1.0",
+    "@mui/icons-material": "^5.14.15",
+    "@mui/material": "^5.14.15",
     "ethers": "^5.7.2",
     "magic-sdk": "^21.2.0",
     "next": "13.5.6",

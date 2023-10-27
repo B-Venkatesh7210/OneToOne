@@ -2,8 +2,11 @@ import React, { useState, useContext } from "react";
 import { IFormData } from "@/utils/types";
 import { BiconomyContext } from "../context/BiconomyContext";
 import Navbar from "@/components/Navbar";
+import { AddAPhoto } from "@mui/icons-material";
+import Image from "next/image";
 
 const BecomeMentor: React.FC = () => {
+  const [selectedImage, setSelectedImage] = useState<any>(null);
   const { createMentorProfile } = useContext(BiconomyContext);
   const [formData, setFormData] = useState<IFormData>({
     name: "",
@@ -12,12 +15,35 @@ const BecomeMentor: React.FC = () => {
     totalNftsupply: 0,
     sessionPrice: 0,
   });
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [profilePictureName, setProfilePictureName] = useState<string | null>(
+    null
+  );
 
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+
+      setProfilePicture(file);
+      setProfilePictureName(file.name);
+    } else {
+      setSelectedImage(null);
+      setProfilePicture(null);
+      setProfilePictureName(null);
+    }
   };
 
   return (
@@ -28,21 +54,73 @@ const BecomeMentor: React.FC = () => {
         <div className="text-[3rem] font-bold mb-10">Become A Mentor</div>
 
         <div className="bgBeauty p-10 rounded-lg shadow-md w-full max-w-xl">
-          <div className="mb-6">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="name"
-            >
-              Name
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-black focus:shadow-outline"
-              id="name"
-              name="name"
-              type="text"
-              placeholder="Enter your name"
-              onChange={handleInputChange}
-            />
+          <div className="mb-6 w-[50%] flex flex-row justify-between items-center">
+            <div>
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="name"
+              >
+                Name
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-black focus:shadow-outline"
+                id="name"
+                name="name"
+                type="text"
+                placeholder="Enter your name"
+                onChange={handleInputChange}
+              />
+            </div>
+            {selectedImage ? (
+              <>
+                <Image
+                  src={selectedImage}
+                  alt="Profile Picture"
+                  layout="fill"
+                  objectFit="contain"
+                  className="object-cover h-full w-full rounded-[50%]"
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  onChange={handleImageChange}
+                />
+              </>
+            ) : (
+              <>
+                <AddAPhoto style={{ fontSize: 30, color: "white" }}></AddAPhoto>
+                {selectedImage ? (
+                  <>
+                    <Image
+                      src={selectedImage}
+                      alt="Profile Picture"
+                      layout="fill"
+                      objectFit="contain"
+                      className="object-cover h-full w-full rounded-[50%]"
+                    />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      onChange={handleImageChange}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <span className="text-center text-white text-[0.8rem]">
+                      Choose Profile Picture
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      onChange={handleImageChange}
+                    />
+                  </>
+                )}
+              </>
+            )}
           </div>
 
           <div className="mb-6">
