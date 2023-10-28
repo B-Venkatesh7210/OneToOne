@@ -1,4 +1,10 @@
-import React, { useCallback, createContext, useState, useEffect } from "react";
+import React, {
+  useCallback,
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+} from "react";
 import { IPaymaster, BiconomyPaymaster } from "@biconomy/paymaster";
 import { IBundler, Bundler } from "@biconomy/bundler";
 import {
@@ -18,29 +24,56 @@ import {
   SponsorUserOperationDto,
   PaymasterMode,
 } from "@biconomy/paymaster";
-import { IFormData } from "@/utils/types";
+import { useRouter } from "next/router";
+import { IMentorDetails, IFormData, IMentorsData } from "@/utils/types";
+import { NFTStorage, File, Blob } from "nft.storage";
+import { nftContractABI } from "../abi/nftContractABI";
 
 export const BiconomyContext = createContext<{
   address: string | null;
   smartAccount: BiconomySmartAccountV2 | null;
   provider: any;
   contract: any;
+  nftContract: any;
   contractAddress: string | null;
   biconomyPaymaster: IHybridPaymaster<SponsorUserOperationDto> | null;
   paymasterServiceData: SponsorUserOperationDto | null;
   connect: () => Promise<void>;
+  getContractDetails: () => Promise<void>;
   changeNumber: () => Promise<void>;
-
+  mentorDetails: IMentorDetails | null;
+  isMentor: boolean;
+  allMentorsData: IMentorsData[];
+  createMentorProfile: (
+    data: IFormData,
+    profilePicture: File | null,
+    profilePictureName: string | null,
+    metadata: string | null
+  ) => Promise<void>;
+  getMentorDetails: (_address: string, _contract: any) => Promise<void>;
+  getAllMentors: (
+    _address: string,
+    _contract: any,
+    _nftContract: any
+  ) => Promise<void>;
 }>({
   address: null,
   smartAccount: null,
   provider: null,
   contract: null,
+  nftContract: null,
   contractAddress: null,
   biconomyPaymaster: null,
   paymasterServiceData: null,
   connect: async () => {},
+  getContractDetails: async () => {},
   changeNumber: async () => {},
+  mentorDetails: null,
+  isMentor: false,
+  allMentorsData: [],
+  createMentorProfile: async () => {},
+  getMentorDetails: async () => {},
+  getAllMentors: async () => {},
 });
 
 export const useBiconomyContext = () => React.useContext(BiconomyContext);
@@ -56,8 +89,19 @@ export const BiconomyProvider = ({ children }: any) => {
     useState<SponsorUserOperationDto | null>(null);
   const [contract, setContract] = useState<any>(null);
   const [contractAddress, setContractAddress] = useState<string | null>(null);
+  const [isMentor, setIsMentor] = useState(false);
+  const [mentorDetails, setMentorDetails] = useState<IMentorDetails | null>(
+    null
+  );
+  const [nftContract, setNftContract] = useState<any>(null);
+  const [allMentorsData, setAllMentorsData] = useState<IMentorsData[]>([]);
+
+  const client = new NFTStorage({
+    token: process.env.NEXT_PUBLIC_NFTSTORAGE_KEY as string,
+  });
 
   let magic: any;
+  const router = useRouter();
 
   const bundler: IBundler = new Bundler({
     bundlerUrl:
@@ -93,7 +137,8 @@ export const BiconomyProvider = ({ children }: any) => {
         activeValidationModule: module2,
       });
 
-      const address = await biconomySmartAccount.getAccountAddress();
+      const smartAccountAddress =
+        await biconomySmartAccount.getAccountAddress();
       const biconomyPaymaster =
         biconomySmartAccount.paymaster as IHybridPaymaster<SponsorUserOperationDto>;
       setBiconomyPaymaster(biconomyPaymaster);
@@ -105,19 +150,74 @@ export const BiconomyProvider = ({ children }: any) => {
         },
       };
       setPaymasterServiceData(paymasterServiceData);
-      console.log(address);
       //0x9D325543fec51Fa17B959Ed5cfdABde780521eF5
       setSmartAccount(biconomySmartAccount);
-      setAddress(address);
-      localStorage.setItem("address", address);
-      localStorage.setItem(
-        "smartAccount",
-        JSON.stringify(biconomySmartAccount)
+      setAddress(smartAccountAddress);
+      // localStorage.setItem("address", address);
+      // localStorage.setItem(
+      //   "smartAccount",
+      //   JSON.stringify(biconomySmartAccount)
+      // );
+
+      const contractAddress2 = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+      //@ts-ignore
+      setContractAddress(contractAddress2);
+      const provider = new ethers.providers.JsonRpcProvider(
+        "https://rpc.ankr.com/polygon_mumbai"
       );
+      const contract2 = new ethers.Contract(
+        //@ts-ignore
+        contractAddress2,
+        contractABI,
+        provider
+      );
+      console.log(contract2);
+      setContract(contract2);
+      const nftContractAddress2 = process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS;
+      const nftContract2 = new ethers.Contract(
+        //@ts-ignore
+        nftContractAddress2,
+        nftContractABI,
+        provider
+      );
+      console.log(nftContract2);
+      setNftContract(nftContract2);
+
+      await getAllMentors(smartAccountAddress, contract2, nftContract2);
+      await getMentorDetails(smartAccountAddress, contract2);
+      router.push("/");
     } catch (error) {
       console.error(error);
     }
   }, []);
+
+  const getContractDetails = async () => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      "https://rpc.ankr.com/polygon_mumbai"
+    );
+    // localStorage.setItem("provider", JSON.stringify(provider));
+    setProvider(provider);
+    const contractAddress2 = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+    //@ts-ignore
+    setContractAddress(contractAddress2);
+    const contract2 = new ethers.Contract(
+      //@ts-ignore
+      contractAddress2,
+      contractABI,
+      provider
+    );
+    console.log(contract2);
+    setContract(contract2);
+    const nftContractAddress2 = process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS;
+    const nftContract2 = new ethers.Contract(
+      //@ts-ignore
+      nftContractAddress2,
+      nftContractABI,
+      provider
+    );
+    console.log(nftContract2);
+    setNftContract(nftContract2);
+  };
 
   useEffect(() => {
     //@ts-ignore
@@ -128,35 +228,129 @@ export const BiconomyProvider = ({ children }: any) => {
       },
     });
 
-    const provider = new ethers.providers.JsonRpcProvider(
-      "https://rpc.ankr.com/polygon_mumbai"
-    );
-    // localStorage.setItem("provider", JSON.stringify(provider));
-    setProvider(provider);
-    const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
-    //@ts-ignore
-    setContractAddress(contractAddress);
-    const contract = new ethers.Contract(
-      //@ts-ignore
-      contractAddress,
-      contractABI,
-      provider
-    );
-    console.log(contract)
-    setContract(contract);
-    // const savedAddress = localStorage.getItem("address");
-    // const savedSmartAccount = JSON.parse(
-    //   localStorage.getItem("smartAccount") || "{}"
-    // );
-
-    // if (savedAddress) {
-    //   setAddress(savedAddress);
-    // }
-
-    // if (savedSmartAccount) {
-    //   setSmartAccount(savedSmartAccount);
-    // }
+    getContractDetails();
   }, []);
+
+  const createMentorProfile = async (
+    formData: IFormData,
+    profilePicture: File | null,
+    profilePictureName: string | null,
+    metadata: string | null
+  ) => {
+    console.log("Hey Wassup");
+    try {
+      //TODO: Add metadata
+
+      const sessionPriceBig = ethers.utils.parseEther(
+        formData.sessionPrice.toString()
+      );
+      const imageFile = new File(
+        [profilePicture as File],
+        profilePictureName as string,
+        {
+          type: profilePicture?.type,
+        }
+      );
+      const imageBlob = imageFile.slice(0, imageFile.size, imageFile.type);
+      const profilePictureCid = await client.storeBlob(imageBlob);
+      console.log("Profile Picture Cid", profilePictureCid);
+      console.log(
+        "Mentor Profile Data",
+        formData.name,
+        profilePictureCid,
+        formData.description,
+        formData.skills,
+        sessionPriceBig,
+        formData.totalNftsupply,
+        metadata
+      );
+      const minTx = await contract.populateTransaction.createMentorProfile(
+        formData.name,
+        profilePictureCid,
+        formData.description,
+        formData.skills,
+        sessionPriceBig,
+        formData.totalNftsupply,
+        metadata
+      );
+      console.log("Mint Tx Data", minTx.data);
+      const tx1 = {
+        to: contractAddress,
+        data: minTx.data,
+      };
+      //@ts-ignore
+      let userOp = await smartAccount?.buildUserOp([tx1]);
+      console.log("UserOp", { userOp });
+
+      const paymasterAndDataResponse =
+        await biconomyPaymaster?.getPaymasterAndData(
+          //@ts-ignore
+          userOp,
+          paymasterServiceData
+        );
+
+      //@ts-ignore
+      userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
+      //@ts-ignore
+      const userOpResponse = await smartAccount?.sendUserOp(userOp);
+      console.log("userOpHash", { userOpResponse });
+      //@ts-ignore
+      const { receipt } = await userOpResponse.wait(1);
+      console.log("txHash", receipt.transactionHash);
+      router.push("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //@ts-ignore
+  const getMentorDetails = async (_address, _contract) => {
+    console.log("Hey I am outside");
+    if (_contract) {
+      console.log("Hey I am inside", _address, _contract);
+      const mentorData = await _contract.mentorProfiles(_address);
+      console.log("Mentor Data", mentorData);
+      if (mentorData.name !== "") {
+        setIsMentor(true);
+      }
+      setMentorDetails({
+        id: mentorData.id,
+        mentor: mentorData.mentor,
+        name: mentorData.name,
+        profilePicture: mentorData.profilePicture,
+        description: mentorData.description,
+        skills: mentorData.skills,
+        sessionPrice: mentorData.sessionPrice,
+        totalNftSupply: mentorData.totalNftSupply,
+      });
+    }
+  };
+
+  //@ts-ignore
+  const getAllMentors = async (_address, _contract, _nftContract) => {
+    const allMentors = await _contract.getAllMentors();
+    console.log("All Mentors", allMentors);
+    let allMentorsData2: IMentorsData[] = [];
+    for (let i = 0; i < allMentors.length; i++) {
+      const mentor = allMentors[i];
+      const hasNFT = await _nftContract.balanceOf(_address, mentor.id);
+      const isSubscriber = hasNFT > 0;
+      const element = {
+        id: mentor.id,
+        mentor: mentor.mentor,
+        name: mentor.name,
+        profilePicture: mentor.profilePicture,
+        description: mentor.description,
+        skills: mentor.skills,
+        sessionPrice: mentor.sessionPrice,
+        isSubscriber: isSubscriber,
+      }; // Assuming 1 is the count of NFT that signifies subscription
+
+      allMentorsData2.push(element);
+    }
+    console.log("All Mentors Data", allMentorsData2);
+    setAllMentorsData(allMentorsData2);
+  };
 
   const changeNumber = async () => {
     try {
@@ -198,11 +392,19 @@ export const BiconomyProvider = ({ children }: any) => {
         smartAccount,
         provider,
         contract,
+        nftContract,
         contractAddress,
         biconomyPaymaster,
         paymasterServiceData,
         connect,
-        changeNumber
+        getContractDetails,
+        changeNumber,
+        mentorDetails,
+        isMentor,
+        allMentorsData,
+        getMentorDetails,
+        createMentorProfile,
+        getAllMentors,
       }}
     >
       {children}

@@ -9,7 +9,14 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ isSticky }) => {
   const router = useRouter();
-  const { address, connect } = useContext(BiconomyContext);
+  const { address, contract, isMentor, getMentorDetails, connect} =
+    useContext(BiconomyContext);
+
+  useEffect(() => {
+    if (address && contract) {
+      getMentorDetails(address, contract);
+    }
+  }, [isMentor]);
 
   return (
     <div
@@ -25,12 +32,15 @@ const Navbar: React.FC<NavbarProps> = ({ isSticky }) => {
         >
           Home
         </button>
-        <button
-          className="text-black font-bold text-xl"
-          onClick={() => router.push("/becomeMentor")}
-        >
-          Mentor
-        </button>
+        {!isMentor && (
+          <button
+            className="text-black font-bold text-xl"
+            onClick={() => router.push("/becomeMentor")}
+          >
+            Mentor
+          </button>
+        )}
+
         <button
           className="text-black font-bold text-xl"
           onClick={() => router.push("/dashboard")}
@@ -56,7 +66,9 @@ const Navbar: React.FC<NavbarProps> = ({ isSticky }) => {
             </button>
           </>
         ) : (
-          <span className="mt-3 text-lg font-semibold text-black">{getEllipsisTxt(address)}</span>
+          <span className="mt-3 text-lg font-semibold text-black">
+            {getEllipsisTxt(address)}
+          </span>
         )}
       </div>
     </div>

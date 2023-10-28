@@ -2,10 +2,18 @@ import React, { useEffect, useContext } from "react";
 import { BiconomyContext } from "@/context/BiconomyContext";
 import { useRouter } from "next/router";
 import Navbar from "@/components/Navbar";
+import Mentor from "@/components/Mentor";
 
 const Home = () => {
-
   const router = useRouter();
+  const { address, contract, nftContract, getAllMentors, allMentorsData } =
+    useContext(BiconomyContext);
+
+  useEffect(() => {
+    if (address && contract && nftContract) {
+      getAllMentors(address, contract, nftContract);
+    }
+  }, [address, contract, nftContract]);
 
   return (
     <>
@@ -16,8 +24,12 @@ const Home = () => {
         <div className="text-[1rem] font-semibold mb-10">
           One to One sessions at fingertips
         </div>
-
-        
+        {allMentorsData &&
+          allMentorsData.map((mentor) => (
+            <div key={mentor.id}>
+              <Mentor data={mentor} />
+            </div>
+          ))}
       </div>
     </>
   );

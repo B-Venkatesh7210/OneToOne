@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { IFormData } from "@/utils/types";
-import { MentorContext } from "../context/MentorContext";
+import { BiconomyContext } from "@/context/BiconomyContext";
 import Navbar from "@/components/Navbar";
 import { AddAPhoto } from "@mui/icons-material";
 import Image from "next/image";
@@ -9,7 +9,6 @@ import html2canvas from "html2canvas";
 
 const BecomeMentor: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<any>(null);
-  const { createMentorProfile } = useContext(MentorContext);
   const [formData, setFormData] = useState<IFormData>({
     name: "",
     description: "",
@@ -21,6 +20,7 @@ const BecomeMentor: React.FC = () => {
   const [profilePictureName, setProfilePictureName] = useState<string | null>(
     null
   );
+  const { createMentorProfile } = useContext(BiconomyContext);
 
   const client = new NFTStorage({
     token: process.env.NEXT_PUBLIC_NFTSTORAGE_KEY as string,
