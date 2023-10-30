@@ -60,7 +60,6 @@ export const BiconomyContext = createContext<{
   ) => Promise<void>;
   requestSession: (
     data: IMentorsData,
-    sessionPrice: string,
     fromTimestamp: number,
     name: string,
     description: string
@@ -107,7 +106,9 @@ export const BiconomyProvider = ({ children }: any) => {
   );
   const [nftContract, setNftContract] = useState<any>(null);
   const [tokenContract, setTokenContract] = useState<any>(null);
-  const [tokenContractAddress, setTokenContractAddress] = useState<string | null>(null)
+  const [tokenContractAddress, setTokenContractAddress] = useState<
+    string | null
+  >(null);
   const [allMentorsData, setAllMentorsData] = useState<IMentorsData[]>([]);
 
   const client = new NFTStorage({
@@ -199,7 +200,7 @@ export const BiconomyProvider = ({ children }: any) => {
       const tokenContractAddress2 =
         process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS;
       //@ts-ignore
-      setTokenContractAddress(tokenContractAddress2)
+      setTokenContractAddress(tokenContractAddress2);
       const tokenContract2 = new ethers.Contract(
         //@ts-ignore
         tokenContractAddress2,
@@ -246,7 +247,7 @@ export const BiconomyProvider = ({ children }: any) => {
     const tokenContractAddress2 =
       process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS;
     //@ts-ignore
-    setTokenContractAddress(tokenContractAddress2)
+    setTokenContractAddress(tokenContractAddress2);
     const tokenContract2 = new ethers.Contract(
       //@ts-ignore
       tokenContractAddress2,
@@ -279,9 +280,9 @@ export const BiconomyProvider = ({ children }: any) => {
     try {
       //TODO: Add metadata
 
-      const sessionPriceBig = ethers.utils.parseEther(
-        formData.sessionPrice.toString()
-      );
+      // const sessionPriceBig = ethers.utils.parseEther(
+      //   formData.sessionPrice.toString()
+      // );
       const imageFile = new File(
         [profilePicture as File],
         profilePictureName as string,
@@ -298,7 +299,7 @@ export const BiconomyProvider = ({ children }: any) => {
         profilePictureCid,
         formData.description,
         formData.skills,
-        sessionPriceBig,
+        // sessionPriceBig,
         formData.totalNftsupply,
         metadata
       );
@@ -307,7 +308,7 @@ export const BiconomyProvider = ({ children }: any) => {
         profilePictureCid,
         formData.description,
         formData.skills,
-        sessionPriceBig,
+        // sessionPriceBig,
         formData.totalNftsupply,
         metadata
       );
@@ -358,7 +359,7 @@ export const BiconomyProvider = ({ children }: any) => {
         profilePicture: mentorData.profilePicture,
         description: mentorData.description,
         skills: mentorData.skills,
-        sessionPrice: mentorData.sessionPrice,
+        // sessionPrice: mentorData.sessionPrice,
         totalNftSupply: mentorData.totalNftSupply,
       });
     }
@@ -380,7 +381,7 @@ export const BiconomyProvider = ({ children }: any) => {
         profilePicture: mentor.profilePicture,
         description: mentor.description,
         skills: mentor.skills,
-        sessionPrice: mentor.sessionPrice,
+        // sessionPrice: mentor.sessionPrice,
         isSubscriber: isSubscriber,
       }; // Assuming 1 is the count of NFT that signifies subscription
 
@@ -437,7 +438,6 @@ export const BiconomyProvider = ({ children }: any) => {
 
   const requestSession = async (
     data: IMentorsData,
-    sessionPrice: string,
     fromTimestamp: number,
     name: string,
     description: string
@@ -446,54 +446,59 @@ export const BiconomyProvider = ({ children }: any) => {
       const roomId: string = await createRoom();
       console.log("Room Id", roomId);
 
-      const bigSessionPrice = ethers.utils.parseEther(sessionPrice.toString());
-      console.log(bigSessionPrice.toString())
+      // const bigSessionPrice = ethers.utils.parseEther(sessionPrice.toString());
+      // console.log(bigSessionPrice.toString());
 
-      const minTx1 = await tokenContract.populateTransaction.approve(
-        tokenContractAddress,
-        bigSessionPrice
-      );
-      console.log("Mint Tx Data", minTx1.data);
-      const tx1 = {
-        to: contractAddress,
-        data: minTx1.data,
-      };
+      // console.log(
+      //   "Token Contract Details",
+      //   tokenContractAddress,
+      //   tokenContract
+      // );
+
+      // const minTx1 = await tokenContract.populateTransaction.approve(
+      //   tokenContractAddress,
+      //   bigSessionPrice
+      // );
+      // console.log("Mint Tx Data 1", minTx1.data);
+      // const tx1 = {
+      //   to: tokenContractAddress,
+      //   data: minTx1.data,
+      // };
 
       const minTx2 = await contract.populateTransaction.requestSession(
         data.mentor,
-        bigSessionPrice,
         roomId,
         fromTimestamp,
         fromTimestamp,
         name,
         description
       );
-      console.log("Mint Tx Data", minTx2.data);
+      console.log("Mint Tx Data 2", minTx2.data);
       const tx2 = {
         to: contractAddress,
         data: minTx2.data,
       };
       //@ts-ignore
-      let userOp = await smartAccount?.buildUserOp([tx1, tx2]);
-      console.log("UserOp", { userOp });
+      let userOp2 = await smartAccount?.buildUserOp([tx2]);
+      console.log("UserOp 2", { userOp2 });
 
-      const paymasterAndDataResponse =
+      const paymasterAndDataResponse2 =
         await biconomyPaymaster?.getPaymasterAndData(
           //@ts-ignore
-          userOp,
+          userOp2,
           paymasterServiceData
         );
 
       //@ts-ignore
-      userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
+      userOp2.paymasterAndData = paymasterAndDataResponse2.paymasterAndData;
       //@ts-ignore
-      const userOpResponse = await smartAccount?.sendUserOp(userOp);
-      console.log("userOpHash", userOpResponse);
+      const userOpResponse2 = await smartAccount?.sendUserOp(userOp2);
+      console.log("userOpHash 2", userOpResponse2);
       //@ts-ignore
-      const { receipt } = await userOpResponse.wait(1);
-      console.log("txHash", receipt.transactionHash);
+      const { receipt: receipt2 } = await userOpResponse2.wait(1);
+      console.log("txHash 2", receipt2.transactionHash);
 
-      router.push("/");
+      // router.push("/");
     } catch (error) {
       console.log(error);
     }

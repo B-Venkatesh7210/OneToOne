@@ -14,7 +14,7 @@ const BecomeMentor: React.FC = () => {
     description: "",
     skills: "",
     totalNftsupply: 0,
-    sessionPrice: 0,
+    // sessionPrice: 0,
   });
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePictureName, setProfilePictureName] = useState<string | null>(
@@ -250,7 +250,7 @@ const BecomeMentor: React.FC = () => {
               />
             </div>
 
-            <div className="mb-6">
+            {/* <div className="mb-6">
               <label
                 className="block text-gray-700 text-sm font-bold mb-2"
                 htmlFor="sessionPrice"
@@ -266,7 +266,7 @@ const BecomeMentor: React.FC = () => {
                 placeholder="Enter whole number > 0"
                 onChange={handleInputChange}
               />
-            </div>
+            </div> */}
 
             <div className="flex justify-center">
               <button

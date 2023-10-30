@@ -3,7 +3,7 @@ export interface IFormData {
   description: string;
   skills: string;
   totalNftsupply: number;
-  sessionPrice: number;
+  // sessionPrice: number;
 }
 
 export interface IMentorDetails {
@@ -13,7 +13,7 @@ export interface IMentorDetails {
   profilePicture: string;
   description: string;
   skills: string;
-  sessionPrice: number;
+  // sessionPrice: number;
   totalNftSupply: number;
 }
 
@@ -24,6 +24,6 @@ export interface IMentorsData {
   profilePicture: string;
   description: string;
   skills: string;
-  sessionPrice: number;
+  // sessionPrice: number;
   isSubscriber: boolean;
 }

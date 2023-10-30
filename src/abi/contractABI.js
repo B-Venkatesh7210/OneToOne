@@ -6,11 +6,6 @@ export const contractABI = [
         name: "_otoNFT",
         type: "address",
       },
-      {
-        internalType: "contract OTO_Token",
-        name: "_otoToken",
-        type: "address",
-      },
     ],
     stateMutability: "nonpayable",
     type: "constructor",
@@ -70,11 +65,6 @@ export const contractABI = [
       },
       {
         internalType: "uint256",
-        name: "_sessionPrice",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
         name: "_totalNftSupply",
         type: "uint256",
       },
@@ -128,11 +118,6 @@ export const contractABI = [
           {
             internalType: "uint256",
             name: "totalNftSupply",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "sessionPrice",
             type: "uint256",
           },
         ],
@@ -194,11 +179,6 @@ export const contractABI = [
       {
         internalType: "uint256",
         name: "sessionId",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "sessionPrice",
         type: "uint256",
       },
       {
@@ -295,11 +275,6 @@ export const contractABI = [
         name: "totalNftSupply",
         type: "uint256",
       },
-      {
-        internalType: "uint256",
-        name: "sessionPrice",
-        type: "uint256",
-      },
     ],
     stateMutability: "view",
     type: "function",
@@ -344,19 +319,6 @@ export const contractABI = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "otoToken",
-    outputs: [
-      {
-        internalType: "contract OTO_Token",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [
       {
         internalType: "uint256",
@@ -380,11 +342,6 @@ export const contractABI = [
         internalType: "address",
         name: "mentor",
         type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "sessionPrice",
-        type: "uint256",
       },
       {
         internalType: "string",
@@ -424,25 +381,6 @@ export const contractABI = [
       {
         internalType: "uint256",
         name: "_value",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "sessionIdToBalance",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
         type: "uint256",
       },
     ],

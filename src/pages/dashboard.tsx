@@ -63,15 +63,15 @@ const Dashboard: React.FC = () => {
     { id: 1, content: "Rejected Session 1" },
   ];
 
-  const getSessionPrice = () => {
-    const bigNumber = ethers.BigNumber.from(
-      mentorDetails?.sessionPrice.toString()
-    );
-    const divisor = ethers.BigNumber.from("1000000000000000000"); // This represents 10^18
+  // const getSessionPrice = () => {
+  //   const bigNumber = ethers.BigNumber.from(
+  //     mentorDetails?.sessionPrice.toString()
+  //   );
+  //   const divisor = ethers.BigNumber.from("1000000000000000000"); // This represents 10^18
 
-    const result = bigNumber.div(divisor);
-    return result.toString();
-  };
+  //   const result = bigNumber.div(divisor);
+  //   return result.toString();
+  // };
 
   return (
     <div className="w-full min-h-screen h-auto flex flex-col justify-start items-center py-10 px-10 bg-gray-950">
@@ -140,14 +140,14 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Session Price */}
-          <div className="mb-6 w-full">
+          {/* <div className="mb-6 w-full">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
               htmlFor="sessionPrice"
             >
               {mentorDetails && `Session Price - ${getSessionPrice()}`}
             </label>
-          </div>
+          </div> */}
         </div>
         <div
           className={`bgBeauty flex flex-col rounded-xl h-[70vh] ${

@@ -45,19 +45,19 @@ const Mentor: React.FC<MentorProps> = ({ data }) => {
     return Math.floor(combinedDateTime.getTime() / 1000);
   };
 
-  const getSessionPrice = () => {
-    const bigNumber = ethers.BigNumber.from(data.sessionPrice.toString());
+  // const getSessionPrice = () => {
+  //   const bigNumber = ethers.BigNumber.from(data.sessionPrice.toString());
 
-    const result = ethers.utils.formatEther(bigNumber.toString());
-    return result.toString();
-  };
+  //   const result = ethers.utils.formatEther(bigNumber.toString());
+  //   return result.toString();
+  // };
 
-  const getHalfSessionPrice = () => {
-    const bigNumber = ethers.BigNumber.from(data.sessionPrice.toString());
+  // const getHalfSessionPrice = () => {
+  //   const bigNumber = ethers.BigNumber.from(data.sessionPrice.toString());
 
-    const result = ethers.utils.formatEther(bigNumber.div(2).toString());
-    return result.toString();
-  };
+  //   const result = ethers.utils.formatEther(bigNumber.div(2).toString());
+  //   return result.toString();
+  // };
 
   const customStyles = {
     content: {
@@ -106,8 +106,8 @@ const Mentor: React.FC<MentorProps> = ({ data }) => {
           <p className="text-base font-semibold text-black">{data.skills}</p>
         </div>
         <div className="w-[30%] flex flex-col justify-start items-center">
-          <p className="text-sm font-semibold text-black">Session Price</p>
-          {data.isSubscriber ? (
+          {/* <p className="text-sm font-semibold text-black">Session Price</p> */}
+          {/* {data.isSubscriber ? (
             <div className="w-full flex flex-row justify-between items-baseline mt-2">
               <h2 className="text-sm font-bold text-red-700 line-through">
                 {getSessionPrice()}
@@ -121,7 +121,7 @@ const Mentor: React.FC<MentorProps> = ({ data }) => {
             <h2 className="text-xl font-bold text-black">
               {getSessionPrice()} 🪙
             </h2>
-          )}
+          )} */}
           {!data.isSubscriber && (
             <button
               className="h-[2rem] w-[4rem] bg-blue-400 rounded-lg mt-4 text-black text-sm font-semibold"
@@ -191,12 +191,11 @@ const Mentor: React.FC<MentorProps> = ({ data }) => {
           <button
             className="w-[80%] h-[3rem] bg-blue-400 mt-10 rounded-xl text-black font-bold"
             onClick={() => {
-              const sessionPrice = data.isSubscriber ? getHalfSessionPrice() : getSessionPrice();
+              // const sessionPrice = data.isSubscriber ? getHalfSessionPrice() : getSessionPrice();
               const fromTimestamp = computeUnixTimestamp();
-              console.log(sessionPrice, fromTimestamp, name, description);
+              // console.log(sessionPrice, fromTimestamp, name, description);
               requestSession(
                 data,
-                sessionPrice,
                 fromTimestamp,
                 name,
                 description
