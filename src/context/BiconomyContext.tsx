@@ -15,10 +15,11 @@ import {
   ECDSAOwnershipValidationModule,
   DEFAULT_ECDSA_OWNERSHIP_MODULE,
 } from "@biconomy/modules";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { ChainId } from "@biconomy/core-types";
 import { Magic } from "magic-sdk";
 import { contractABI } from "../abi/contractABI";
+import { tokenContractABI } from "../abi/tokenContractABI";
 import {
   IHybridPaymaster,
   SponsorUserOperationDto,
@@ -28,6 +29,7 @@ import { useRouter } from "next/router";
 import { IMentorDetails, IFormData, IMentorsData } from "@/utils/types";
 import { NFTStorage, File, Blob } from "nft.storage";
 import { nftContractABI } from "../abi/nftContractABI";
+import axios from "axios";
 
 export const BiconomyContext = createContext<{
   address: string | null;
@@ -56,6 +58,14 @@ export const BiconomyContext = createContext<{
     _contract: any,
     _nftContract: any
   ) => Promise<void>;
+  requestSession: (
+    data: IMentorsData,
+    sessionPrice: string,
+    fromTimestamp: number,
+    name: string,
+    description: string
+  ) => Promise<void>;
+  mintNft: (data: IMentorsData) => Promise<void>;
 }>({
   address: null,
   smartAccount: null,
@@ -74,6 +84,8 @@ export const BiconomyContext = createContext<{
   createMentorProfile: async () => {},
   getMentorDetails: async () => {},
   getAllMentors: async () => {},
+  requestSession: async () => {},
+  mintNft: async () => {},
 });
 
 export const useBiconomyContext = () => React.useContext(BiconomyContext);
@@ -94,6 +106,8 @@ export const BiconomyProvider = ({ children }: any) => {
     null
   );
   const [nftContract, setNftContract] = useState<any>(null);
+  const [tokenContract, setTokenContract] = useState<any>(null);
+  const [tokenContractAddress, setTokenContractAddress] = useState<string | null>(null)
   const [allMentorsData, setAllMentorsData] = useState<IMentorsData[]>([]);
 
   const client = new NFTStorage({
@@ -182,6 +196,17 @@ export const BiconomyProvider = ({ children }: any) => {
       );
       console.log(nftContract2);
       setNftContract(nftContract2);
+      const tokenContractAddress2 =
+        process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS;
+      setTokenContractAddress(tokenContractAddress2)
+      const tokenContract2 = new ethers.Contract(
+        //@ts-ignore
+        tokenContractAddress2,
+        tokenContractABI,
+        provider
+      );
+      console.log(tokenContract2);
+      setTokenContract(tokenContract2);
 
       await getAllMentors(smartAccountAddress, contract2, nftContract2);
       await getMentorDetails(smartAccountAddress, contract2);
@@ -217,6 +242,18 @@ export const BiconomyProvider = ({ children }: any) => {
     );
     console.log(nftContract2);
     setNftContract(nftContract2);
+    const tokenContractAddress2 =
+      process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS;
+    //@ts-ignore
+    setTokenContractAddress(tokenContractAddress2)
+    const tokenContract2 = new ethers.Contract(
+      //@ts-ignore
+      tokenContractAddress2,
+      tokenContractABI,
+      provider
+    );
+    console.log(tokenContract2);
+    setTokenContract(tokenContract2);
   };
 
   useEffect(() => {
@@ -385,6 +422,116 @@ export const BiconomyProvider = ({ children }: any) => {
     }
   };
 
+  const createRoom = async () => {
+    try {
+      const response = await axios.post("/api/create-room");
+      console.log(response);
+      const data = response.data.data.roomId;
+      console.log(data);
+      return data; // do something with the response data
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const requestSession = async (
+    data: IMentorsData,
+    sessionPrice: string,
+    fromTimestamp: number,
+    name: string,
+    description: string
+  ) => {
+    try {
+      const roomId: string = await createRoom();
+      console.log("Room Id", roomId);
+
+      const bigSessionPrice = ethers.utils.parseEther(sessionPrice.toString());
+      console.log(bigSessionPrice.toString())
+
+      const minTx1 = await tokenContract.populateTransaction.approve(
+        tokenContractAddress,
+        bigSessionPrice
+      );
+      console.log("Mint Tx Data", minTx1.data);
+      const tx1 = {
+        to: contractAddress,
+        data: minTx1.data,
+      };
+
+      const minTx2 = await contract.populateTransaction.requestSession(
+        data.mentor,
+        bigSessionPrice,
+        roomId,
+        fromTimestamp,
+        fromTimestamp,
+        name,
+        description
+      );
+      console.log("Mint Tx Data", minTx2.data);
+      const tx2 = {
+        to: contractAddress,
+        data: minTx2.data,
+      };
+      //@ts-ignore
+      let userOp = await smartAccount?.buildUserOp([tx1, tx2]);
+      console.log("UserOp", { userOp });
+
+      const paymasterAndDataResponse =
+        await biconomyPaymaster?.getPaymasterAndData(
+          //@ts-ignore
+          userOp,
+          paymasterServiceData
+        );
+
+      //@ts-ignore
+      userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
+      //@ts-ignore
+      const userOpResponse = await smartAccount?.sendUserOp(userOp);
+      console.log("userOpHash", userOpResponse);
+      //@ts-ignore
+      const { receipt } = await userOpResponse.wait(1);
+      console.log("txHash", receipt.transactionHash);
+
+      router.push("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const mintNft = async (data: IMentorsData) => {
+    try {
+      const minTx = await contract.populateTransaction.mintNFT(data.id);
+      console.log("Mint Tx Data", minTx.data);
+      const tx1 = {
+        to: contractAddress,
+        data: minTx.data,
+      };
+      //@ts-ignore
+      let userOp = await smartAccount?.buildUserOp([tx1]);
+      console.log("UserOp", { userOp });
+
+      const paymasterAndDataResponse =
+        await biconomyPaymaster?.getPaymasterAndData(
+          //@ts-ignore
+          userOp,
+          paymasterServiceData
+        );
+
+      //@ts-ignore
+      userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
+      //@ts-ignore
+      const userOpResponse = await smartAccount?.sendUserOp(userOp);
+      console.log("userOpHash", userOpResponse);
+      //@ts-ignore
+      const { receipt } = await userOpResponse.wait(1);
+      console.log("txHash", receipt.transactionHash);
+
+      // router.push("/dashboard");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <BiconomyContext.Provider
       value={{
@@ -405,6 +552,8 @@ export const BiconomyProvider = ({ children }: any) => {
         getMentorDetails,
         createMentorProfile,
         getAllMentors,
+        requestSession,
+        mintNft,
       }}
     >
       {children}

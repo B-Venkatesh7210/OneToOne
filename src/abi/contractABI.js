@@ -2,6 +2,22 @@ export const contractABI = [
   {
     inputs: [
       {
+        internalType: "contract OTONFT",
+        name: "_otoNFT",
+        type: "address",
+      },
+      {
+        internalType: "contract OTO_Token",
+        name: "_otoToken",
+        type: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    inputs: [
+      {
         internalType: "uint256",
         name: "_mentorId",
         type: "uint256",
@@ -72,83 +88,6 @@ export const contractABI = [
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_mentorId",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_sessionId",
-        type: "uint256",
-      },
-    ],
-    name: "rejectSession",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "mentor",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "sessionPrice",
-        type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "roomId",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "fromTimestamp",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "toTimestamp",
-        type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "name",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "description",
-        type: "string",
-      },
-    ],
-    name: "requestSession",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "contract OTONFT",
-        name: "_otoNFT",
-        type: "address",
-      },
-      {
-        internalType: "contract OTO_Token",
-        name: "_otoToken",
-        type: "address",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "constructor",
   },
   {
     inputs: [],
@@ -366,6 +305,19 @@ export const contractABI = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_mentorId",
+        type: "uint256",
+      },
+    ],
+    name: "mintNFT",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "number",
     outputs: [
@@ -402,6 +354,67 @@ export const contractABI = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_mentorId",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_sessionId",
+        type: "uint256",
+      },
+    ],
+    name: "rejectSession",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "mentor",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "sessionPrice",
+        type: "uint256",
+      },
+      {
+        internalType: "string",
+        name: "roomId",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "fromTimestamp",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "toTimestamp",
+        type: "uint256",
+      },
+      {
+        internalType: "string",
+        name: "name",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "description",
+        type: "string",
+      },
+    ],
+    name: "requestSession",
+    outputs: [],
+    stateMutability: "payable",
     type: "function",
   },
   {
