@@ -9,7 +9,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ isSticky }) => {
   const router = useRouter();
-  const { address, contract, isMentor, getMentorDetails, connect} =
+  const { address, contract, isMentor, getMentorDetails, connect } =
     useContext(BiconomyContext);
 
   useEffect(() => {
@@ -47,14 +47,14 @@ const Navbar: React.FC<NavbarProps> = ({ isSticky }) => {
         >
           Profile
         </button>
-        {address == null || address == undefined ? (
+        {/* {address == null || address == undefined ? (
           <div className="flex-none"></div>
         ) : (
           <div className="flex flex-row justify-center items-center gap-2">
             <span className="text-black text-[2rem] font-bold">100</span>
             <span className="text-black text-[1.5rem]">🪙</span>
           </div>
-        )}
+        )} */}
 
         {address == null || address == undefined ? (
           <>

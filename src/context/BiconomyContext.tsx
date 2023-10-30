@@ -54,6 +54,10 @@ export const BiconomyContext = createContext<{
   approvedSessions: ISessionData[];
   rejectedSessions: ISessionData[];
   pendingSessions: ISessionData[];
+  roomId: string | null;
+  globalCamStream: any;
+  setGlobalCamStream: React.Dispatch<React.SetStateAction<any>>;
+  setRoomId: React.Dispatch<React.SetStateAction<string | null>>;
   createMentorProfile: (
     data: IFormData,
     profilePicture: File | null,
@@ -75,6 +79,7 @@ export const BiconomyContext = createContext<{
   mintNft: (data: IMentorsData) => Promise<void>;
   getMentorSessions: (mentorId: number) => Promise<void>;
   approveSession: (mentorId: number, sessionId: number) => Promise<void>;
+  rejectSession: (mentorId: number, sessionId: number) => Promise<void>;
 }>({
   address: null,
   smartAccount: null,
@@ -93,6 +98,10 @@ export const BiconomyContext = createContext<{
   approvedSessions: [],
   rejectedSessions: [],
   pendingSessions: [],
+  roomId: null,
+  globalCamStream: null,
+  setGlobalCamStream: () => {},
+  setRoomId: () => {},
   createMentorProfile: async () => {},
   getMentorDetails: async () => {},
   getAllMentors: async () => {},
@@ -100,6 +109,7 @@ export const BiconomyContext = createContext<{
   mintNft: async () => {},
   getMentorSessions: async () => {},
   approveSession: async () => {},
+  rejectSession: async () => {},
 });
 
 export const useBiconomyContext = () => React.useContext(BiconomyContext);
@@ -128,6 +138,8 @@ export const BiconomyProvider = ({ children }: any) => {
   const [approvedSessions, setApprovedSessions] = useState<ISessionData[]>([]);
   const [rejectedSessions, setRejectedSessions] = useState<ISessionData[]>([]);
   const [pendingSessions, setPendingSessions] = useState<ISessionData[]>([]);
+  const [roomId, setRoomId] = useState<string | null>(null);
+  const [globalCamStream, setGlobalCamStream] = useState<any>(null);
 
   const client = new NFTStorage({
     token: process.env.NEXT_PUBLIC_NFTSTORAGE_KEY as string,
@@ -606,6 +618,38 @@ export const BiconomyProvider = ({ children }: any) => {
     console.log("txHash", receipt.transactionHash);
   };
 
+  const rejectSession = async (mentorId: number, sessionId: number) => {
+    console.log(mentorId, sessionId);
+    const minTx = await contract.populateTransaction.rejectSession(
+      mentorId,
+      sessionId
+    );
+    console.log("Mint Tx Data", minTx.data);
+    const tx1 = {
+      to: contractAddress,
+      data: minTx.data,
+    };
+    //@ts-ignore
+    let userOp = await smartAccount?.buildUserOp([tx1]);
+    console.log("UserOp", { userOp });
+
+    const paymasterAndDataResponse =
+      await biconomyPaymaster?.getPaymasterAndData(
+        //@ts-ignore
+        userOp,
+        paymasterServiceData
+      );
+
+    //@ts-ignore
+    userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
+    //@ts-ignore
+    const userOpResponse = await smartAccount?.sendUserOp(userOp);
+    console.log("userOpHash", userOpResponse);
+    //@ts-ignore
+    const { receipt } = await userOpResponse.wait(1);
+    console.log("txHash", receipt.transactionHash);
+  };
+
   return (
     <BiconomyContext.Provider
       value={{
@@ -626,6 +670,10 @@ export const BiconomyProvider = ({ children }: any) => {
         approvedSessions,
         rejectedSessions,
         pendingSessions,
+        roomId,
+        globalCamStream,
+        setGlobalCamStream,
+        setRoomId,
         getMentorDetails,
         createMentorProfile,
         getAllMentors,
@@ -633,6 +681,7 @@ export const BiconomyProvider = ({ children }: any) => {
         mintNft,
         getMentorSessions,
         approveSession,
+        rejectSession,
       }}
     >
       {children}
