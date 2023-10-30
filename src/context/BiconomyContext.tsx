@@ -198,6 +198,7 @@ export const BiconomyProvider = ({ children }: any) => {
       setNftContract(nftContract2);
       const tokenContractAddress2 =
         process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS;
+      //@ts-ignore
       setTokenContractAddress(tokenContractAddress2)
       const tokenContract2 = new ethers.Contract(
         //@ts-ignore
