@@ -76,7 +76,7 @@ const Room = () => {
       <div className="h-[10vh]"></div>
       <span
         onClick={() => {
-          console.log(peers);
+          console.log(JSON.stringify(peers));
         }}
       >
         Room
