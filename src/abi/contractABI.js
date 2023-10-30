@@ -130,6 +130,77 @@ export const contractABI = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_mentorId",
+        type: "uint256",
+      },
+    ],
+    name: "getMentorSessions",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "sessionId",
+            type: "uint256",
+          },
+          {
+            internalType: "string",
+            name: "roomId",
+            type: "string",
+          },
+          {
+            internalType: "address",
+            name: "from",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "to",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "toId",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "fromTimestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "toTimestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "description",
+            type: "string",
+          },
+          {
+            internalType: "enum OneToOne.Status",
+            name: "status",
+            type: "uint8",
+          },
+        ],
+        internalType: "struct OneToOne.Session[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "mentorId",
     outputs: [

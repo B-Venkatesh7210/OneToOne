@@ -1,3 +1,5 @@
+import { BigNumber } from "ethers";
+
 export interface IFormData {
   name: string;
   description: string;
@@ -26,4 +28,17 @@ export interface IMentorsData {
   skills: string;
   // sessionPrice: number;
   isSubscriber: boolean;
+}
+
+export interface ISessionData {
+  sessionId: BigNumber,
+  roomId: string,
+  from: string,
+  to: string,
+  toId: BigNumber,
+  fromTimestamp: BigNumber,
+  toTimestamp: BigNumber,
+  name: string,
+  description: string,
+  status: string
 }

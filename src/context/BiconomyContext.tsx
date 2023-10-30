@@ -26,7 +26,12 @@ import {
   PaymasterMode,
 } from "@biconomy/paymaster";
 import { useRouter } from "next/router";
-import { IMentorDetails, IFormData, IMentorsData } from "@/utils/types";
+import {
+  IMentorDetails,
+  IFormData,
+  IMentorsData,
+  ISessionData,
+} from "@/utils/types";
 import { NFTStorage, File, Blob } from "nft.storage";
 import { nftContractABI } from "../abi/nftContractABI";
 import axios from "axios";
@@ -46,6 +51,9 @@ export const BiconomyContext = createContext<{
   mentorDetails: IMentorDetails | null;
   isMentor: boolean;
   allMentorsData: IMentorsData[];
+  approvedSessions: ISessionData[];
+  rejectedSessions: ISessionData[];
+  pendingSessions: ISessionData[];
   createMentorProfile: (
     data: IFormData,
     profilePicture: File | null,
@@ -65,6 +73,8 @@ export const BiconomyContext = createContext<{
     description: string
   ) => Promise<void>;
   mintNft: (data: IMentorsData) => Promise<void>;
+  getMentorSessions: (mentorId: number) => Promise<void>;
+  approveSession: (mentorId: number, sessionId: number) => Promise<void>;
 }>({
   address: null,
   smartAccount: null,
@@ -80,11 +90,16 @@ export const BiconomyContext = createContext<{
   mentorDetails: null,
   isMentor: false,
   allMentorsData: [],
+  approvedSessions: [],
+  rejectedSessions: [],
+  pendingSessions: [],
   createMentorProfile: async () => {},
   getMentorDetails: async () => {},
   getAllMentors: async () => {},
   requestSession: async () => {},
   mintNft: async () => {},
+  getMentorSessions: async () => {},
+  approveSession: async () => {},
 });
 
 export const useBiconomyContext = () => React.useContext(BiconomyContext);
@@ -110,6 +125,9 @@ export const BiconomyProvider = ({ children }: any) => {
     string | null
   >(null);
   const [allMentorsData, setAllMentorsData] = useState<IMentorsData[]>([]);
+  const [approvedSessions, setApprovedSessions] = useState<ISessionData[]>([]);
+  const [rejectedSessions, setRejectedSessions] = useState<ISessionData[]>([]);
+  const [pendingSessions, setPendingSessions] = useState<ISessionData[]>([]);
 
   const client = new NFTStorage({
     token: process.env.NEXT_PUBLIC_NFTSTORAGE_KEY as string,
@@ -538,6 +556,56 @@ export const BiconomyProvider = ({ children }: any) => {
     }
   };
 
+  const getMentorSessions = async (mentorId: number) => {
+    const allMentorSessions2 = await contract.getMentorSessions(mentorId);
+    console.log("All Mentor Sessions", allMentorSessions2);
+    const approvedSessions = allMentorSessions2.filter(
+      (session: any) => session.status === 0
+    );
+    const rejectedSessions = allMentorSessions2.filter(
+      (session: any) => session.status === 1
+    );
+    const pendingSessions = allMentorSessions2.filter(
+      (session: any) => session.status === 2
+    );
+
+    setApprovedSessions(approvedSessions);
+    setRejectedSessions(rejectedSessions);
+    setPendingSessions(pendingSessions);
+  };
+
+  const approveSession = async (mentorId: number, sessionId: number) => {
+    console.log(mentorId, sessionId);
+    const minTx = await contract.populateTransaction.approveSession(
+      mentorId.toString(),
+      sessionId.toString()
+    );
+    console.log("Mint Tx Data", minTx.data);
+    const tx1 = {
+      to: contractAddress,
+      data: minTx.data,
+    };
+    //@ts-ignore
+    let userOp = await smartAccount?.buildUserOp([tx1]);
+    console.log("UserOp", { userOp });
+
+    const paymasterAndDataResponse =
+      await biconomyPaymaster?.getPaymasterAndData(
+        //@ts-ignore
+        userOp,
+        paymasterServiceData
+      );
+
+    //@ts-ignore
+    userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
+    //@ts-ignore
+    const userOpResponse = await smartAccount?.sendUserOp(userOp);
+    console.log("userOpHash", userOpResponse);
+    //@ts-ignore
+    const { receipt } = await userOpResponse.wait(1);
+    console.log("txHash", receipt.transactionHash);
+  };
+
   return (
     <BiconomyContext.Provider
       value={{
@@ -555,11 +623,16 @@ export const BiconomyProvider = ({ children }: any) => {
         mentorDetails,
         isMentor,
         allMentorsData,
+        approvedSessions,
+        rejectedSessions,
+        pendingSessions,
         getMentorDetails,
         createMentorProfile,
         getAllMentors,
         requestSession,
         mintNft,
+        getMentorSessions,
+        approveSession,
       }}
     >
       {children}

@@ -138,7 +138,7 @@ const Mentor: React.FC<MentorProps> = ({ data }) => {
       </div>
       <button
         onClick={handleBookSession}
-        className="h-[2.5rem] w-full bg-blue-400 rounded-lg mt-5 text-black font-bold"
+        className="h-[2.5rem] w-full bg-blue-400 rounded-lg mt-10 text-black font-bold"
       >
         Book A Session
       </button>

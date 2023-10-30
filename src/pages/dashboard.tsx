@@ -4,6 +4,7 @@ import { BiconomyContext } from "@/context/BiconomyContext";
 import Image2 from "../assets/images/image.jpg";
 import Image from "next/image";
 import { BigNumber, ethers } from "ethers";
+import Session from "../components/Session";
 
 interface Session {
   id: number;
@@ -21,12 +22,18 @@ const Dashboard: React.FC = () => {
     getMentorDetails,
     mentorDetails,
     isMentor,
+    approvedSessions,
+    rejectedSessions,
+    pendingSessions,
+    getMentorSessions,
   } = useContext(BiconomyContext);
 
   useEffect(() => {
     getContractDetails();
     //@ts-ignore
     getMentorDetails(address, contract);
+    //@ts-ignore
+    getMentorSessions(mentorDetails?.id);
   }, []);
 
   const handleTabClick = (tab: TabType) => {
@@ -36,32 +43,15 @@ const Dashboard: React.FC = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case "Pending":
-        return pendingSessions.map((session) => (
-          <div key={session.id}>{session.content}</div>
-        ));
+        return <Session sessions={pendingSessions} />;
       case "Approved":
-        return approvedSessions.map((session) => (
-          <div key={session.id}>{session.content}</div>
-        ));
+        return <Session sessions={approvedSessions} />;
       case "Rejected":
-        return rejectedSessions.map((session) => (
-          <div key={session.id}>{session.content}</div>
-        ));
+        return <Session sessions={rejectedSessions} />;
       default:
         return null;
     }
   };
-
-  const pendingSessions: Session[] = [
-    { id: 1, content: "Pending Session 1" },
-    { id: 2, content: "Pending Session 2" },
-  ];
-  const approvedSessions: Session[] = [
-    { id: 1, content: "Approved Session 1" },
-  ];
-  const rejectedSessions: Session[] = [
-    { id: 1, content: "Rejected Session 1" },
-  ];
 
   // const getSessionPrice = () => {
   //   const bigNumber = ethers.BigNumber.from(
